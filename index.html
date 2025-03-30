@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Information and Event Management (SIEM) Dashboard</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif; 
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a1e3a, #1a3c6e); 
+            overflow: hidden;
+        }
+
+        .container {
+            width: 400px;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: fadeIn 0.5s ease-in-out;
+            z-index: 1000; 
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .form-page {
+            display: none;
+        }
+
+        .form-page.active {
+            display: block;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #3498db; 
+            font-weight: 600;
+            font-size: 26px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase; 
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #f9f9f9; 
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            transform: translateY(-2px);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #3498db, #0078d4); 
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #0078d4, #005a9e);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 90, 158, 0.4);
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .link a:hover {
+            text-decoration: underline;
+            color: #0078d4;
+            text-shadow: 0 1px 2px rgba(0, 120, 212, 0.3);
+        }
+
+        /* Dashboard Styles */
+        #dashboard {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #0a1e3a, #1a3c6e); 
+            color: #fff;
+            padding: 0;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-in-out;
+            z-index: 900; 
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%) scale(0.9); opacity: 0; }
+            to { transform: translateX(0) scale(1); opacity: 1; }
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100%;
+            background: #1a3c6e; 
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 20px;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar h3 {
+            color: #3498db;
+            margin-bottom: 25px;
+            font-size: 22px;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar ul {
+            list-style: none;
+            margin-bottom: auto; 
+        }
+
+        .sidebar ul li {
+            padding: 14px 12px;
+            margin: 12px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar ul li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(52, 152, 219, 0.2);
+            transition: left 0.5s ease;
+        }
+
+        .sidebar ul li:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar ul li:hover::after {
+            left: 0;
+        }
+
+        .sidebar .system-time {
+            color: #b0c4de;
+            font-size: 14px;
+            margin-top: 20px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .sidebar .system-time:hover {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 25px;
+            height: 100%;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(5px); 
+        }
+
+        .header {
+            background: #2c3e50; 
+            color: #ffffff;
+            padding: 15px 25px;
+            border-radius: 0;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            font-size: 18px;
+            font-weight: 600;
+            border-left: 5px solid #3498db;
+        }
+
+        .dashboard-page {
+            display: none;
+        }
+
+        .dashboard-page.active {
+            display: block !important;
+        }
+
+        h2.header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3498db;
+            text-transform: uppercase;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Stats and Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 5px solid #3498db;
+            background: linear-gradient(135deg, #ffffff, #f5f8fa);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card h3 {
+            color: #3498db;
+            margin-bottom: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .stat-card p {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* User List */
+        .user-list {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #3498db;
+            background: linear-gradient(135deg, #ffffff, #f5f8fa);
+        }
+
+        .user-list h3 {
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .user-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .user-item:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        /* Log Search Page */
+        #logSearchPage {
+            display: none;
+        }
+
+        .log-search-container {
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px); 
+        }
+
+        .log-search-header {
+            margin-bottom: 15px;
+        }
+
+        .log-search-header h2 {
+            font-size: 20px;
+            color: #3498db;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background: #ffffff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .search-form:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .search-form input, .search-form select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 150px;
+            background: #f9f9f9;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .search-form input:focus, .search-form select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .search-button {
+            padding: 10px 18px;
+            background: linear-gradient(45deg, #3498db, #0078d4);
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-button:hover {
+            background: linear-gradient(45deg, #0078d4, #005a9e);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 90, 158, 0.4);
+        }
+
+        .log-results {
+            margin-top: 20px;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .log-table th, .log-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #333;
+            transition: background 0.3s ease;
+        }
+
+        .log-table th {
+            background: #2c3e50;
+            font-weight: 600;
+            color: #ffffff;
+            text-transform: uppercase;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        .log-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .log-table tr:nth-child(even) {
+            background: #f5f8fa; 
+        }
+
+        
+        .current-stats {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #ffffff, #f5f8fa);
+        }
+
+        .current-stats p {
+            font-size: 14px;
+            color: #444;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .time-range-dropdown {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .time-range-dropdown select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 200px;
+            background: #f9f9f9;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .time-range-dropdown select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            transform: translateY(-2px);
+        }
+
+        
+        #logSearchPage .header {
+            background: #2c3e50; 
+            color: #ffffff;
+            padding: 15px 25px;
+            border-radius: 0;
+            margin-bottom: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            font-size: 18px;
+            font-weight: 600;
+            border-left: 5px solid #3498db;
+        }
+
+        
+        .footer-attribution {
+            position: fixed;
+            bottom: 10px;
+            right: 20px;
+            font-size: 12px;
+            color: #b0c4de;
+            opacity: 0.8;
+            transition: opacity 0.3s ease, text-shadow 0.3s ease;
+            font-family: 'Consolas', monospace;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-attribution:hover {
+            opacity: 1;
+            text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div class="container form-page active" id="loginPage">
+        <h2>Login to SIEM Dashboard</h2>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" required placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword" required placeholder="Enter your password">
+        </div>
+        <button onclick="login()">Secure Login</button>
+        <div class="link">
+            <a href="#" onclick="showPage('signupPage')">Create Account</a> |
+            <a href="#" onclick="showPage('forgotPage')">Forgot Password?</a>
+        </div>
+    </div>
+
+    <!-- Sign Up Page -->
+    <div class="container form-page" id="signupPage">
+        <h2>Register for SIEM Access</h2>
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="signupName" required placeholder="Enter your full name">
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="signupEmail" required placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signupPassword" required placeholder="Create a secure password">
+        </div>
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="signupConfirmPassword" required placeholder="Confirm your password">
+        </div>
+        <button onclick="signup()">Register Securely</button>
+        <div class="link">
+            <a href="#" onclick="showPage('loginPage')">Back to Login</a>
+        </div>
+    </div>
+
+    <!-- Forgot Password Page -->
+    <div class="container form-page" id="forgotPage">
+        <h2>Reset Password</h2>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="forgotEmail" required placeholder="Enter your email">
+        </div>
+        <button onclick="sendVerification()">Send Verification Code</button>
+        <div class="link">
+            <a href="#" onclick="showPage('loginPage')">Back to Login</a>
+        </div>
+    </div>
+
+    <!-- Verification Page -->
+    <div class="container form-page" id="verifyPage">
+        <h2>Verify Your Account</h2>
+        <div class="form-group">
+            <label>Verification Code (Check below)</label>
+            <p id="verificationCode" style="color: #3498db; font-weight: 700;"></p>
+        </div>
+        <div class="form-group">
+            <label>Enter Code</label>
+            <input type="text" id="verifyInput" required placeholder="Enter verification code">
+        </div>
+        <button onclick="verifyCode()">Verify Now</button>
+        <div class="link">
+            <a href="#" onclick="showPage('loginPage')">Back to Login</a>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard">
+        <div class="sidebar">
+            <h3>Security Dashboard</h3>
+            <ul>
+                <li onclick="showDashboardPage('homePage')">Home Page</li>
+                <li onclick="showDashboardPage('logSearchPage')">Log Search</li>
+                <li>Network</li>
+                <li>Logs</li>
+            </ul>
+            <div class="system-time" id="systemTime">System Time: <span id="currentTime"></span></div>
+        </div>
+        <div class="main-content">
+            <!-- Home Page -->
+            <div id="homePage" class="dashboard-page active">
+                <div class="header">
+                    <h2 class="header-title">Dashboard Overview</h2>
+                </div>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Users</h3>
+                        <p id="userCount">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Events Processed</h3>
+                        <p id="eventsProcessed">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>New Alerts</h3>
+                        <p id="newAlerts">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Data Collection Issues</h3>
+                        <p id="dataIssues">0</p>
+                    </div>
+                </div>
+                <div class="user-list">
+                    <h3>Registered Users</h3>
+                    <div id="userList"></div>
+                </div>
+            </div>
+
+            <!-- Log Search Page -->
+            <div id="logSearchPage" class="dashboard-page">
+                <div class="header">
+                    <h2 class="header-title">Log Search</h2>
+                </div>
+                <div class="log-search-container">
+                    <div class="search-form">
+                        <input type="text" id="searchQuery" placeholder="Quick Search..." required>
+                        <button class="search-button" onclick="searchLogs()">Search</button>
+                    </div>
+                    <div class="current-stats">
+                        <p>Start Time: <input type="datetime-local" id="startTime" value="2025-03-04T11:58:00"></p>
+                        <p>End Time: <input type="datetime-local" id="endTime" value="2025-03-04T12:03:00"></p>
+                        <p>View: <select id="viewOption">
+                            <option value="default">Default (No History)</option>
+                        </select></p>
+                        <p>Total Results: 0 (0 MB Total) | Data Files Searched: 0 (0 TB Total) | Index File Count: 0</p>
+                        <p>Real Time (streaming): 26ms | Last 5 Minutes (auto refresh): 26ms</p>
+                        <div class="time-range-dropdown">
+                            <select id="timeRangeDropdown">
+                                <option value="last5">Last 5 Minutes</option>
+                                <option value="last15">Last 15 Minutes</option>
+                                <option value="last30">Last 30 Minutes</option>
+                                <option value="last45">Last 45 Minutes</option>
+                                <option value="lastHour">Last Hour</option>
+                                <option value="last3">Last 3 Hours</option>
+                                <option value="last6">Last 6 Hours</option>
+                                <option value="last12">Last 12 Hours</option>
+                                <option value="last24">Last 24 Hours</option>
+                                <option value="last3Days">Last 3 Days</option>
+                                <option value="last7Days">Last 7 Days</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="log-results">
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Log Source</th>
+                                    <th>Event Count</th>
+                                    <th>Time</th>
+                                    <th>Category</th>
+                                    <th>Source IP</th>
+                                    <th>Destination IP</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logResults"></tbody>
+                        </table>
+                        <p>Displaying 0 to 0 of 0 items (Elapsed time: 0:00:206)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        
+        let users = {};
+        let logs = []; 
+        let currentVerificationCode = '';
+        let isAuthenticated = false; 
+
+        /**
+         * Sanitizes input to prevent XSS and ensure data integrity
+         * @param {string} input - Input string to sanitize
+         * @returns {string} Sanitized string
+         */
+        function sanitizeInput(input) {
+            return input.replace(/</g, "<").replace(/>/g, ">").trim();
+        }
+
+        /**
+         * Shows the specified form page, hiding the dashboard
+         * @param {string} pageId - ID of the form page to show
+         */
+        function showPage(pageId) {
+            document.getElementById('dashboard').style.display = 'none';
+            document.querySelectorAll('.form-page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        /**
+         * Shows the specified dashboard page, ensuring user authentication
+         * @param {string} pageId - ID of the dashboard page to show
+         */
+        function showDashboardPage(pageId) {
+            if (!isAuthenticated) {
+                showPage('loginPage'); 
+                return;
+            }
+
+            document.getElementById('dashboard').style.display = 'block';
+            document.querySelectorAll('.container').forEach(container => {
+                container.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.dashboard-page').forEach(page => {
+                page.classList.remove('active');
+            });
+            const selectedPage = document.getElementById(pageId);
+            if (selectedPage) {
+                selectedPage.classList.add('active');
+                if (pageId === 'logSearchPage') {
+                    updateSystemTime(); 
+                    startTimeUpdate(); 
+                    console.log('Log Search page loaded and content initialized');
+                    
+                    const results = document.getElementById('logResults');
+                    results.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 12px;">No results were returned.</td></tr>';
+                    document.querySelector('.current-stats p:nth-child(4)').textContent = `Total Results: 0 (0 MB Total) | Data Files Searched: 0 (0 TB Total) | Index File Count: 0`;
+                    document.querySelector('.log-results p').textContent = `Displaying 0 to 0 of 0 items `;
+                }
+            } else {
+                console.error(`Dashboard page with ID ${pageId} not found`);
+            }
+        }
+
+        /**
+         * Handles user signup with strong password requirements
+         */
+        function signup() {
+            const name = sanitizeInput(document.getElementById('signupName').value);
+            const email = sanitizeInput(document.getElementById('signupEmail').value);
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+            if (!name || !email || !password || !confirmPassword) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            if (users[email]) {
+                alert('Email already registered');
+                return;
+            }
+
+           
+            if (password.length < 12 || !/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[!@#$%^&*]/.test(password)) {
+                alert('Password must be at least 12 characters long, include a capital letter, a number, and a special character (!@#$%^&*)');
+                return;
+            }
+
+            users[email] = { name, password };
+            currentVerificationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('verificationCode').textContent = currentVerificationCode;
+            showPage('verifyPage');
+            
+            updateUserCount();
+            updateUserList();
+        }
+
+        /**
+         * Handles user login with authentication
+         */
+        function login() {
+            const email = sanitizeInput(document.getElementById('loginEmail').value);
+            const password = document.getElementById('loginPassword').value;
+            
+            if (users[email] && users[email].password === password) {
+                isAuthenticated = true; 
+                document.querySelectorAll('.container').forEach(container => {
+                    container.style.display = 'none';
+                });
+                document.getElementById('dashboard').style.display = 'block';
+                showDashboardPage('homePage');
+            } else {
+                alert('Invalid email or password');
+            }
+        }
+
+        /**
+         * Sends verification code for password reset
+         */
+        function sendVerification() {
+            const email = sanitizeInput(document.getElementById('forgotEmail').value);
+            
+            if (users[email]) {
+                currentVerificationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                document.getElementById('verificationCode').textContent = currentVerificationCode;
+                showPage('verifyPage');
+            } else {
+                alert('Email not found');
+            }
+        }
+
+        /**
+         * Verifies the user-entered code
+         */
+        function verifyCode() {
+            const inputCode = sanitizeInput(document.getElementById('verifyInput').value);
+            
+            if (inputCode === currentVerificationCode) {
+                alert('Verification successful!');
+                showPage('loginPage');
+            } else {
+                alert('Invalid verification code');
+            }
+        }
+
+        /**
+         * Updates the user count display
+         */
+        function updateUserCount() {
+            const userCount = Object.keys(users).length;
+            document.getElementById('userCount').textContent = userCount;
+        }
+
+        /**
+         * Updates the user list display
+         */
+        function updateUserList() {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            Object.entries(users).forEach(([email, user]) => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.textContent = `${user.name} - ${email}`;
+                userList.appendChild(userItem);
+            });
+        }
+
+        /**
+         * Searches and filters log data based on user input
+         */
+        function searchLogs() {
+            const query = sanitizeInput(document.getElementById('searchQuery').value.toLowerCase());
+            const startTime = new Date(document.getElementById('startTime').value);
+            const endTime = new Date(document.getElementById('endTime').value);
+            const timeRange = document.getElementById('timeRangeDropdown').value;
+            const results = document.getElementById('logResults');
+            results.innerHTML = '';
+
+            let filteredLogs = [...logs];
+
+            
+            filteredLogs = filteredLogs.filter(log => {
+                const logTime = new Date(log.time);
+                if (startTime && endTime) {
+                    return logTime >= startTime && logTime <= endTime;
+                } else {
+                    const now = new Date();
+                    const diffMs = now - logTime;
+                    const diffMinutes = diffMs / 60000;
+
+                    switch (timeRange) {
+                        case 'last5': return diffMinutes <= 5;
+                        case 'last15': return diffMinutes <= 15;
+                        case 'last30': return diffMinutes <= 30;
+                        case 'last45': return diffMinutes <= 45;
+                        case 'lastHour': return diffMinutes <= 60;
+                        case 'last3': return diffMinutes <= 180;
+                        case 'last6': return diffMinutes <= 360;
+                        case 'last12': return diffMinutes <= 720;
+                        case 'last24': return diffMinutes <= 1440;
+                        case 'last3Days': return diffMinutes <= 4320;
+                        case 'last7Days': return diffMinutes <= 10080;
+                        default: return true;
+                    }
+                }
+            });
+
+            
+            if (query) {
+                filteredLogs = filteredLogs.filter(log => 
+                    log.eventName.toLowerCase().includes(query) ||
+                    log.logSource.toLowerCase().includes(query) ||
+                    log.category.toLowerCase().includes(query) ||
+                    log.sourceIP.includes(query) ||
+                    log.destIP.includes(query)
+                );
+            }
+
+            if (filteredLogs.length === 0) {
+                results.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 12px;">No results were returned.</td></tr>';
+            } else {
+                filteredLogs.forEach(log => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${log.eventName}</td>
+                        <td>${log.logSource}</td>
+                        <td>${log.eventCount}</td>
+                        <td>${log.time}</td>
+                        <td>${log.category}</td>
+                        <td>${log.sourceIP}</td>
+                        <td>${log.destIP}</td>
+                    `;
+                    results.appendChild(row);
+                });
+            }
+
+            
+            document.querySelector('.current-stats p:nth-child(4)').textContent = `Total Results: ${filteredLogs.length} (${(filteredLogs.length * 0.1).toFixed(1)} MB Total) | Data Files Searched: 0 (0 TB Total) | Index File Count: 0`;
+            document.querySelector('.log-results p').textContent = `Displaying 0 to ${filteredLogs.length} of ${filteredLogs.length} items (Elapsed time: 0:00:206)`;
+        }
+
+        /**
+         * Updates the system time in real-time on the sidebar
+         */
+        function updateSystemTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit', 
+                hour12: true, 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        /**
+         * Starts a real-time clock to update the system time every second
+         */
+        function startTimeUpdate() {
+            updateSystemTime(); // Initial update
+            setInterval(updateSystemTime, 1000); // Update every second
+        }
+
+        
+        document.getElementById('userCount').textContent = '0';
+        document.getElementById('eventsProcessed').textContent = '0';
+        document.getElementById('newAlerts').textContent = '0';
+        document.getElementById('dataIssues').textContent = '0';
+
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!isAuthenticated) {
+                showPage('loginPage');
+            } else {
+                showDashboardPage('homePage');
+            }
+        });
+    </script>
+</body>
+</html>

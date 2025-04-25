@@ -1,53 +1,132 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>demo</artifactId>
+    <artifactId>log-collector</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>21</maven.compiler.source> <!-- Java version -->
+        <maven.compiler.target>21</maven.compiler.target> <!-- Java version -->
     </properties>
 
     <dependencies>
-        <!-- JNA Core -->
+        <!-- Spring Boot Starter Web (for basic web application setup) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>2.7.10</version>
+        </dependency>
+
+        <!-- Spring Boot Starter Test (for testing dependencies like @SpringBootTest) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>2.7.10</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JSch: SSH support -->
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
+        </dependency>
+
+        <!-- JNA -->
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
             <version>5.13.0</version>
         </dependency>
-
-        <!-- JNA Platform (Required for Advapi32 & WinNT) -->
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
             <version>5.13.0</version>
         </dependency>
 
-        <!-- JSON Parsing -->
+        <!-- JSON library for JSON processing -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20230227</version>
+            <version>20231013</version>
         </dependency>
 
-        <!-- JUnit for Testing -->
+        <!-- JUnit 5 Dependency (for unit tests) -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.10.0</version>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- JSch for SSH -->
+        <!-- JUnit 5 Vintage Engine (for compatibility with older tests) -->
         <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>0.1.55</version>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Jakarta Persistence API (for JPA) -->
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <!-- Spring Context -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>5.3.29</version> <!-- Use the appropriate version -->
+        </dependency>
+
+        <!-- Spring Boot Starter Data JPA (for JPA support) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>2.7.10</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Compiler plugin to ensure Java version and enable preview features -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <compilerArgs>
+                        <arg>--enable-preview</arg> <!-- Enables preview features -->
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <!-- Spring Boot Maven Plugin (to package and run the Spring Boot app) -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.7.10</version>
+            </plugin>
+
+            <!-- Plugin to allow running the main class -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>com.example.LogCollector</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

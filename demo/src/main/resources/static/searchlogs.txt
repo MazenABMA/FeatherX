@@ -1,0 +1,35 @@
+function searchLogs() {
+    const query = sanitizeInput(document.getElementById("searchQuery").value);
+    
+    if (!query) {
+        alert("Please enter a search query.");
+        return;
+    }
+
+    // Send request to search logs
+    fetch(`http://localhost:8080/api/logs/search?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.logs && data.logs.length > 0) {
+                let resultsHTML = '';
+                data.logs.forEach(log => {
+                    resultsHTML += `<tr>
+                        <td>${log.eventName}</td>
+                        <td>${log.source}</td>
+                        <td>${log.eventCount}</td>
+                        <td>${log.time}</td>
+                        <td>${log.category}</td>
+                        <td>${log.sourceIP}</td>
+                        <td>${log.destIP}</td>
+                    </tr>`;
+                });
+                document.getElementById("logResults").innerHTML = resultsHTML;
+            } else {
+                alert("No logs found.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("There was an error searching for logs.");
+        });
+}

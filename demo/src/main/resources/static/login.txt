@@ -1,0 +1,38 @@
+function login() {
+    const email = sanitizeInput(document.getElementById("loginEmail").value);
+    const password = sanitizeInput(document.getElementById("loginPassword").value);
+
+    if (!email || !password) {
+        alert("Please fill in both fields.");
+        return;
+    }
+
+    // Create request body
+    const credentials = {
+        email: email,
+        password: password
+    };
+
+    // Send POST request to the backend for login
+    fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(credentials)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            isAuthenticated = true;
+            alert("Login successful!");
+            window.location.href = '/dashboard';  // Redirect to the dashboard or home page
+        } else {
+            alert("Invalid credentials. Please try again.");
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("There was an error logging in.");
+    });
+}

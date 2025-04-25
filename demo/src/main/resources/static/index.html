@@ -746,7 +746,129 @@
                     console.log('Log Search page loaded and content initialized');
                     
                     const results = document.getElementById('logResults');
-                    results.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 12px;">No results were returned.</td></tr>';
+                    results.innerHTML = ''; // Clear any previous results
+                    const selectedPage = document.getElementById(pageId);
+if (selectedPage) {
+    selectedPage.classList.add('active');
+    if (pageId === 'logSearchPage') {
+        updateSystemTime(); 
+        startTimeUpdate(); 
+        console.log('Log Search page loaded and content initialized');
+        
+        const logs = [
+            {
+                time: "Apr 10 02:14",
+                category: "Warning",
+                source: "Microsoft-Windows-DNS-Client",
+                eventId: 1014,
+                description: "Name resolution for the name www.youtube.com timed out.",
+                sourceIP: "192.168.1.10",
+                destinationIP: "8.8.8.8"
+            },
+            {
+                time: "Apr 10 02:08",
+                category: "Warning",
+                source: "DCOM",
+                eventId: 10016,
+                description: "The description for Event ID '10016' in Source DCOM.",
+                sourceIP: "192.168.1.11",
+                destinationIP: "10.0.0.2"
+            },
+            {
+                time: "Apr 10 01:54",
+                category: "Warning",
+                source: "Microsoft-Windows-DNS-Client",
+                eventId: 1014,
+                description: "Name resolution for the name ipv6.msftconnecttest.com timed out.",
+                sourceIP: "192.168.1.12",
+                destinationIP: "8.8.4.4"
+            },
+            {
+                time: "Apr 10 01:36",
+                category: "Warning",
+                source: "DCOM",
+                eventId: 10016,
+                description: "The description for Event ID '10016' in Source DCOM.",
+                sourceIP: "192.168.1.13",
+                destinationIP: "10.0.0.3"
+            },
+            {
+                time: "Apr 10 01:32",
+                category: "Warning",
+                source: "DCOM",
+                eventId: 10016,
+                description: "The description for Event ID '10016' in Source DCOM.",
+                sourceIP: "192.168.1.14",
+                destinationIP: "10.0.0.4"
+            },
+            {
+                time: "Apr 10 01:29",
+                category: "Warning",
+                source: "DCOM",
+                eventId: 10016,
+                description: "The description for Event ID '10016' in Source DCOM.",
+                sourceIP: "192.168.1.15",
+                destinationIP: "10.0.0.5"
+            },
+            {
+                time: "Apr 10 01:25",
+                category: "Warning",
+                source: "DCOM",
+                eventId: 10016,
+                description: "The description for Event ID '10016' in Source DCOM.",
+                sourceIP: "192.168.1.16",
+                destinationIP: "10.0.0.6"
+            },
+            {
+                time: "Apr 10 01:24",
+                category: "Warning",
+                source: "DCOM",
+                eventId: 10016,
+                description: "The description for Event ID '10016' in Source DCOM.",
+                sourceIP: "192.168.1.17",
+                destinationIP: "10.0.0.7"
+            },
+            {
+                time: "Apr 10 01:24",
+                category: "Warning",
+                source: "DCOM",
+                eventId: 10016,
+                description: "The description for Event ID '10016' in Source DCOM.",
+                sourceIP: "192.168.1.18",
+                destinationIP: "10.0.0.8"
+            }
+        ];
+
+        const results = document.getElementById('logResults');
+        results.innerHTML = ''; // Clear any previous results
+
+        // Loop through logs and create table rows dynamically
+        logs.forEach(log => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${log.description}</td>
+                <td>${log.source}</td>
+                <td>1</td>
+                <td>${log.time}</td>
+                <td>${log.category}</td>
+                <td>${log.sourceIP}</td>
+                <td>${log.destinationIP}</td>
+            `;
+            results.appendChild(row);
+        });
+
+        // Update the stats summary dynamically
+        document.querySelector('.current-stats p:nth-child(4)').textContent = 
+            `Total Results: ${logs.length} (0.01 MB Total) | Data Files Searched: 1 (0 TB Total) | Index File Count: 1`;
+
+        document.querySelector('.log-results p').textContent = 
+            `Displaying 1 to ${logs.length} of ${logs.length} items (Elapsed time: 0:00:206)`;
+
+    }
+} else {
+    console.error(`Dashboard page with ID ${pageId} not found`);
+}
+;
                     document.querySelector('.current-stats p:nth-child(4)').textContent = `Total Results: 0 (0 MB Total) | Data Files Searched: 0 (0 TB Total) | Index File Count: 0`;
                     document.querySelector('.log-results p').textContent = `Displaying 0 to 0 of 0 items `;
                 }
